@@ -1,6 +1,6 @@
 # Ride: Import Library
 
-ORM providers of the import library of the PHP Ride framework.
+ORM providers for the import library of the PHP Ride framework.
 
 ## Code Sample
 
