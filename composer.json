@@ -2,7 +2,7 @@
     "name": "ride/lib-import-orm",
     "description": "ORM providers for the import library of the Ride framework",
     "license": "MIT",
-    "version": "0.2.1",
+    "version": "0.3.0",
     "authors": [
         {
             "name": "Joris Vandeweerd",
@@ -15,6 +15,7 @@
     },
     "autoload": {
         "psr-0": {
+            "ride\\library\\decorator\\": ["src/"],
             "ride\\library\\import\\": ["src/"]
         }
     }
