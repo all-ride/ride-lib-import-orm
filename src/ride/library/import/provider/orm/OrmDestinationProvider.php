@@ -91,7 +91,9 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
 
             $this->model->save($entry);
 
-            $this->externalIdMap[$externalId] = $entry->id;
+            if ($externalId) {
+                $this->externalIdMap[$externalId] = $entry->id;
+            }
         } catch (Exception $exception) {
             if ($this->isTransactionStarted) {
                 $this->connection->rollbackTransaction();
