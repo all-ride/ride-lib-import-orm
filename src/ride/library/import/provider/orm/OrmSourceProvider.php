@@ -35,8 +35,6 @@ class OrmSourceProvider extends AbstractOrmProvider implements SourceProvider {
     public function preImport(Importer $importer) {
         $this->result = $this->getQuery()->query();
         reset($this->result);
-        print(count($this->result));
-        print(gettype($this->result));
     }
 
     /**
