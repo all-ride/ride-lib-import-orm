@@ -15,7 +15,7 @@
     },
     "autoload": {
         "psr-0": {
-            "ride\\library\\import\\provider\\orm": ["src/"]
+            "ride\\library\\import\\": ["src/"]
         }
     }
 }
