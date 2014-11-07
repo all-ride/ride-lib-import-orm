@@ -47,6 +47,14 @@ class AbstractOrmProvider implements Provider {
     }
 
     /**
+     * Gets the model of this provider
+     * @return \ride\library\orm\model\Model
+     */
+    public function getModel() {
+        return $this->model;
+    }
+
+    /**
      * Gets the available column names for this provider
      * @return array Array with the name of the column as key and as value
      */
