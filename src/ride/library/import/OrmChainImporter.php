@@ -49,6 +49,8 @@ class OrmChainImporter extends ChainImporter {
             if ($this->isTransactionStarted) {
                 $this->connection->rollbackTransaction();
             }
+
+            throw $exception;
         }
     }
 
