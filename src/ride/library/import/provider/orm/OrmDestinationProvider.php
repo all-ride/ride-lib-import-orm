@@ -13,6 +13,18 @@ use \Exception;
 class OrmDestinationProvider extends AbstractOrmProvider implements DestinationProvider {
 
     /**
+     * Name of the source column which holds the id in the external resource
+     * @var string
+     */
+    protected $externalId;
+
+    /**
+     * Map with the external id as key and the internal id as value
+     * @var array
+     */
+    protected $externalIdMap;
+
+    /**
      * Instance of the database connection
      * @var \ride\library\database\driver\Driver
      */
@@ -25,12 +37,31 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
     protected $isTransactionStarted;
 
     /**
+     * Sets the source column which holds the id in the external resource
+     * @param string $externalId Name of the source column
+     * @return null
+     */
+    public function setExternalId($externalId) {
+        $this->externalId = $externalId;
+    }
+
+    /**
+     * Gets the map of external ids with the internal id
+     * @return array
+     */
+    public function getExternalIdMap() {
+        return $this->externalIdMap;
+    }
+
+    /**
      * Performs preparation tasks of the import
      * @return null
      */
     public function preImport(Importer $importer) {
         $this->connection = $this->model->getOrmManager()->getConnection();
         $this->isTransactionStarted = $this->connection->beginTransaction();
+
+        $this->externalIdMap = array();
     }
 
     /**
@@ -40,15 +71,27 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
      */
     public function setRow(array $row) {
         try {
-            $entry = $this->model->createEntry();
+            $entry = null;
+            $externalId = null;
+
+            if ($this->externalId && isset($row[$this->externalId])) {
+                $externalId = $row[$this->externalId];
+                $entry = $this->model->getById($externalId, null, true);
+            }
+
+            if (!$entry) {
+                $entry = $this->model->createEntry();
+            }
 
             foreach ($this->columnNames as $columnName) {
                 if (isset($row[$columnName])) {
                     $this->reflectionHelper->setProperty($entry, $columnName, $row[$columnName]);
                 }
             }
-var_export($entry);
+
             $this->model->save($entry);
+
+            $this->externalIdMap[$externalId] = $entry->id;
         } catch (Exception $exception) {
             if ($this->isTransactionStarted) {
                 $this->connection->rollbackTransaction();
