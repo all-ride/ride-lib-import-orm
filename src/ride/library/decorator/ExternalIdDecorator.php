@@ -28,7 +28,7 @@ class ExternalIdDecorator implements Decorator {
      * original value otherwise
      */
     public function decorate($value) {
-        $externalIdMap = $this->destinationProvider;
+        $externalIdMap = $this->destinationProvider->getExternalIdMap();
         if (!isset($externalIdMap[$value])) {
             return $value;
         }
