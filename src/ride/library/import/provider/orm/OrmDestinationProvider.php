@@ -76,11 +76,15 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
 
             if ($this->externalId && isset($row[$this->externalId])) {
                 $externalId = $row[$this->externalId];
-                $entry = $this->model->getById($externalId, null, true);
+                $entry = $this->model->getById($externalId, $this->locale, true);
             }
 
             if (!$entry) {
                 $entry = $this->model->createEntry();
+
+                if ($this->model->getMeta()->isLocalized()) {
+                    $entry->setLocale($this->locale);
+                }
             }
 
             foreach ($this->columnNames as $columnName) {

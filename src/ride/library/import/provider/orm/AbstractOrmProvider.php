@@ -25,6 +25,12 @@ class AbstractOrmProvider implements Provider {
     protected $reflectionHelper;
 
     /**
+     * Code of the locale
+     * @param string
+     */
+    protected $locale;
+
+    /**
      * Array with the name of the column as key and value
      * @var array
      */

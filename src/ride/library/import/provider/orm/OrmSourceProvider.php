@@ -22,7 +22,7 @@ class OrmSourceProvider extends AbstractOrmProvider implements SourceProvider {
      */
     public function getQuery() {
         if ($this->query === null) {
-            $this->query = $this->model->createQuery();
+            $this->query = $this->model->createQuery($this->locale);
         }
 
         return $this->query;
