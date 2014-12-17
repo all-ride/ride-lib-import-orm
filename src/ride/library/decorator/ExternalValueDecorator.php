@@ -27,9 +27,19 @@ class ExternalValueDecorator implements Decorator {
      * @param string $fieldName Name of the field to match
      * @return null
      */
-    public function __construct(Model $model, $fieldName) {
+    public function __construct(Model $model, $fieldName, $locale = null) {
         $this->model = $model;
         $this->fieldName = $fieldName;
+        $this->locale = $locale;
+    }
+
+    /**
+     * Sets the base options for the getBy call
+     * @param array $options
+     * @return null
+     */
+    public function setOptions(array $options) {
+        $this->options = $options;
     }
 
     /**
@@ -39,11 +49,18 @@ class ExternalValueDecorator implements Decorator {
      * otherwise
      */
     public function decorate($value) {
-        if (!is_string($value)) {
+        if (!is_string($value) && !is_numeric($value)) {
             return $value;
         }
 
-        return $this->model->getBy(array('filter' => array($this->fieldName => $value)));
+        $options = $this->options;
+        if (!isset($options['filter'])) {
+            $options['filter'] = array();
+        }
+
+        $options['filter'][$this->fieldName] = $value;
+
+        return $this->model->getBy($options, $this->locale);
     }
 
 }
