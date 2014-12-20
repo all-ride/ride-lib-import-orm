@@ -8,7 +8,7 @@ use ride\library\import\provider\orm\OrmDestinationProvider;
  * Decorator to create proxy values for a import destination provider. It should
  * be used in a mapper after the provided destination provider has been
  * imported. You can then use this decorator on the proceeding import for the id
- * of the external entry. It wel then convert the external id into a entry proxy.
+ * of the external entry. It will then convert the external id into a entry proxy.
  */
 class ExternalIdDecorator implements Decorator {
 
@@ -28,12 +28,12 @@ class ExternalIdDecorator implements Decorator {
      * original value otherwise
      */
     public function decorate($value) {
-        $externalIdMap = $this->destinationProvider->getExternalIdMap();
-        if (!isset($externalIdMap[$value])) {
+        $idMap = $this->destinationProvider->getIdMap();
+        if (!isset($idMap[$value])) {
             return $value;
         }
 
-        return $this->destinationProvider->getModel()->createProxy($externalIdMap[$value]);
+        return $this->destinationProvider->getModel()->createProxy($idMap[$value]);
     }
 
 }
