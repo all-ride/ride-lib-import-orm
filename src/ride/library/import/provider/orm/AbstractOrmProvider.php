@@ -4,13 +4,14 @@ namespace ride\library\import\provider\orm;
 
 use ride\library\import\provider\Provider;
 use ride\library\import\Importer;
+use ride\library\orm\definition\ModelTable;
 use ride\library\orm\model\Model;
 use ride\library\reflection\ReflectionHelper;
 
 /**
  * Abstract import provider for a ORM model
  */
-class AbstractOrmProvider implements Provider {
+abstract class AbstractOrmProvider implements Provider {
 
     /**
      * Instance of the model
@@ -44,7 +45,7 @@ class AbstractOrmProvider implements Provider {
     public function __construct(Model $model, ReflectionHelper $reflectionHelper) {
         $this->model = $model;
         $this->reflectionHelper = $reflectionHelper;
-        $this->columnNames = array();
+        $this->columnNames = array(ModelTable::PRIMARY_KEY => ModelTable::PRIMARY_KEY);
 
         $fields = $this->model->getMeta()->getFields();
         foreach ($fields as $fieldName => $field) {
@@ -61,27 +62,28 @@ class AbstractOrmProvider implements Provider {
     }
 
     /**
+     * Sets the locale for the entries
+     * @param string|null $locale Code of the locale
+     * @return null
+     */
+    public function setLocale($locale) {
+        $this->locale = $locale;
+    }
+
+    /**
+     * Gets the locale of the entries
+     * @return string|null Code of the locale
+     */
+    public function getLocale() {
+        return $this->locale;
+    }
+
+    /**
      * Gets the available column names for this provider
      * @return array Array with the name of the column as key and as value
      */
     public function getColumnNames() {
         return $this->columnNames;
-    }
-
-    /**
-     * Performs preparation tasks of the import
-     * @return null
-     */
-    public function preImport(Importer $importer) {
-
-    }
-
-    /**
-     * Performs finishing tasks of the import
-     * @return null
-     */
-    public function postImport() {
-
     }
 
 }

@@ -22,6 +22,12 @@ class ExternalValueDecorator implements Decorator {
     protected $fieldName;
 
     /**
+     * Options for the getBy call
+     * @var array
+     */
+    protected $options;
+
+    /**
      * Constructs a new external value decorator
      * @param \ride\library\orm\model\Model $model Instance of the model to query
      * @param string $fieldName Name of the field to match
