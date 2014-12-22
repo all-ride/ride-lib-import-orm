@@ -4,6 +4,7 @@ namespace ride\library\import\provider\orm;
 
 use ride\library\import\provider\DestinationProvider;
 use ride\library\import\Importer;
+use ride\library\orm\definition\ModelTable;
 use ride\library\validation\exception\ValidationException;
 
 use \Exception;
@@ -11,13 +12,20 @@ use \Exception;
 /**
  * Import destintation provider of a ORM model
  */
-class OrmDestinationProvider extends AbstractOrmProvider implements DestinationProvider {
+class OrmDestinationProvider extends AbstractOrmProvider implements DestinationProvider, IdMapProvider {
 
     /**
      * Name of the source column which holds the id in the source provider
      * @var string
      */
     protected $sourceId;
+
+    /**
+     * Flag to see existing entries should be used instead of automatically
+     * import as new entries
+     * @var boolean
+     */
+    protected $sourceLookup;
 
     /**
      * Map with the source id as key and the model entry id as value, used to
@@ -28,7 +36,7 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
 
     /**
      * Destination provider to initialize the id map
-     * @var OrmDestinationProvider
+     * @var IdMapProvider
      */
     protected $idMapProvider;
 
@@ -37,6 +45,12 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
      * @var boolean
      */
     protected $ignoreValidationException;
+
+    /**
+     * Flag to see if existing entries should be skipped
+     * @var boolean
+     */
+    protected $skipExistingEntries;
 
     /**
      * Instance of the database connection
@@ -68,6 +82,16 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
     }
 
     /**
+     * Sets wheter an existing entry should be queried instead of automatically
+     * insert a new entry. This query uses the sourceId as column name.
+     * @param boolean $sourceLookup
+     * @return null
+     */
+    public function setSourceLookup($sourceLookup) {
+        $this->sourceLookup = $sourceLookup;
+    }
+
+    /**
      * Sets the id map to resolve existing entries. Source id needs to be set
      * to have an effect of this call.
      * @param array $idMap Array with the id in the source provider as key
@@ -89,11 +113,11 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
 
     /**
      * Sets the provider for the id map
-     * @param OrmDestinationProvider $provider Provider to retrieve the id map
-     * from before running the import
+     * @param IdMapProvider $provider Provider to retrieve the id map from
+     * before running the import
      * @return null
      */
-    public function setIdMapProvider(OrmDestinationProvider $provider = null) {
+    public function setIdMapProvider(IdMapProvider $provider = null) {
         $this->idMapProvider = $provider;
     }
 
@@ -113,6 +137,15 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
      */
     public function setIgnoreValidationException($ignoreValidationException) {
         $this->ignoreValidationException = $ignoreValidationException;
+    }
+
+    /**
+     * Sets the flag to skip existing entries
+     * @param boolean $skipExistingEntries
+     * @return null
+     */
+    public function setSkipExistingEntries($skipExistingEntries) {
+        $this->skipExistingEntries = $skipExistingEntries;
     }
 
     /**
@@ -136,7 +169,6 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
     public function setRow(array $row) {
         try {
             $sourceId = null;
-            $entryId = null;
             $entry = null;
 
             // check for a link between source and destination
@@ -145,14 +177,17 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
                 $sourceId = $row[$this->sourceId];
 
                 if ($this->idMap && isset($this->idMap[$sourceId])) {
-                    // entry id found for the source id
+                    // lookup entry based on the id map
                     $entryId = $this->idMap[$sourceId];
+                    $entry = $this->model->getById($entryId, $this->locale, true);
+                } elseif ($this->sourceLookup) {
+                    $entry = $this->model->getBy(array('filter' => array($this->sourceId => $sourceId)), $this->locale, true);
                 }
             }
 
-            if ($entryId) {
-                // lookup entry
-                $entry = $this->model->getById($entryId, $this->locale, true);
+            if ($this->skipExistingEntries && $entry) {
+                // skip existing entries, do nothing and go back
+                return;
             }
 
             if (!$entry) {
@@ -167,6 +202,10 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
 
             // populate properties of the entry
             foreach ($this->columnNames as $columnName) {
+                if ($columnName == ModelTable::PRIMARY_KEY) {
+                    continue;
+                }
+
                 if (isset($row[$columnName])) {
                     $this->reflectionHelper->setProperty($entry, $columnName, $row[$columnName]);
                 }
