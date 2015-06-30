@@ -2,8 +2,10 @@
 
 namespace ride\library\import\provider\orm;
 
+use ride\library\import\exception\ImportException;
 use ride\library\import\provider\SourceProvider;
 use ride\library\import\Importer;
+use ride\library\orm\query\ModelQuery;
 
 /**
  * Import source provider of a ORM model
@@ -15,6 +17,19 @@ class OrmSourceProvider extends AbstractOrmProvider implements SourceProvider {
      * @var \ride\library\orm\query\ModelQuery
      */
     protected $query;
+
+    /**
+     * Sets the query which will be used to fetch the source entries
+     * @param \ride\library\orm\query\ModelQuery $query $query
+     * @return null
+     */
+    public function setQuery(ModelQuery $query) {
+        if ($query->getModel()->getName() != $this->model->getName()) {
+            throw new ImportException('Could not set model query for this source provider: query is not for model ' . $this->model->getName());
+        }
+
+        $this->query = $query;
+    }
 
     /**
      * Gets the query which will be used to fetch the source entries
@@ -49,10 +64,11 @@ class OrmSourceProvider extends AbstractOrmProvider implements SourceProvider {
         }
 
         $row = $row['value'];
+        $reflectionHelper = $this->model->getReflectionHelper();
 
         $result = array();
         foreach ($this->columnNames as $columnName) {
-            $result[$columnName] = $this->reflectionHelper->getProperty($row, $columnName);
+            $result[$columnName] = $reflectionHelper->getProperty($row, $columnName);
         }
 
         return $result;

@@ -2,6 +2,7 @@
 
 namespace ride\library\import\provider\orm;
 
+use ride\library\import\provider\orm\populator\EntryPopulator;
 use ride\library\import\provider\DestinationProvider;
 use ride\library\import\Importer;
 use ride\library\orm\definition\ModelTable;
@@ -149,6 +150,26 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
     }
 
     /**
+     * Sets the entry populator
+     * @param \ride\library\import\provider\orm\populator\EntryPopulator $entryPopulator
+     */
+    public function setEntryPopulator(EntryPopulator $entryPopulator) {
+        $this->entryPopulator = $entryPopulator;
+    }
+
+    /**
+     * Gets the entry populator
+     * @return \ride\library\import\provider\orm\populator\EntryPopulator
+     */
+    public function getEntryPopulator() {
+        if (!$this->entryPopulator) {
+            $this->entryPopulator = new GenericEntryPopulator($this->model->getReflectionHelper());
+        }
+
+        return $this->entryPopulator;
+    }
+
+    /**
      * Performs preparation tasks of the import
      * @return null
      */
@@ -201,15 +222,7 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
             }
 
             // populate properties of the entry
-            foreach ($this->columnNames as $columnName) {
-                if ($columnName == ModelTable::PRIMARY_KEY) {
-                    continue;
-                }
-
-                if (isset($row[$columnName])) {
-                    $this->reflectionHelper->setProperty($entry, $columnName, $row[$columnName]);
-                }
-            }
+            $this->getEntryPopulator()->populateEntry($this->columnNames, $entry, $row);
 
             // save the entry
             $this->model->save($entry);
