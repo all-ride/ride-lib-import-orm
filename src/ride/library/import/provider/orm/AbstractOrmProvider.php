@@ -6,7 +6,6 @@ use ride\library\import\provider\Provider;
 use ride\library\import\Importer;
 use ride\library\orm\definition\ModelTable;
 use ride\library\orm\model\Model;
-use ride\library\reflection\ReflectionHelper;
 
 /**
  * Abstract import provider for a ORM model
@@ -18,12 +17,6 @@ abstract class AbstractOrmProvider implements Provider {
      * @var \ride\library\orm\model\Model
      */
     protected $model;
-
-    /**
-     * Instance of the reflection helper
-     * @var \ride\library\reflection\ReflectionHelper
-     */
-    protected $reflectionHelper;
 
     /**
      * Code of the locale
@@ -42,9 +35,8 @@ abstract class AbstractOrmProvider implements Provider {
      * @param \ride\library\orm\model\Model $model
      * @return null
      */
-    public function __construct(Model $model, ReflectionHelper $reflectionHelper) {
+    public function __construct(Model $model) {
         $this->model = $model;
-        $this->reflectionHelper = $reflectionHelper;
         $this->columnNames = array(ModelTable::PRIMARY_KEY => ModelTable::PRIMARY_KEY);
 
         $fields = $this->model->getMeta()->getFields();
