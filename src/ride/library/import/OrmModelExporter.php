@@ -140,7 +140,7 @@ class OrmModelExporter {
         }
 
         $fields = $meta->getFields();
-        $fields = $this->getFields($fields, $exportFields);
+        $fields = $this->getFields($fields, $exportFields, true);
 
         // map id
         $columnIndex = 1;
@@ -160,7 +160,7 @@ class OrmModelExporter {
                 $exportFields = $this->getExportFields($exportFields);
 
                 $relationFields = $relationModel->getMeta()->getFields();
-                $relationFields = $this->getFields($relationFields, $exportFields);
+                $relationFields = $this->getFields($relationFields, $exportFields, false);
 
                 foreach ($relationFields as $relationFieldName => $relationField) {
                     if ($relationFieldName === ModelTable::PRIMARY_KEY) {
@@ -209,7 +209,7 @@ class OrmModelExporter {
      * @return array Array with the name of the field as key and an instance of
      * ModelField as value
      */
-    protected function getFields(array $fields, $exportFields) {
+    protected function getFields(array $fields, $exportFields, $includeDefault) {
         $result = array();
 
         if ($exportFields === true) {
@@ -224,6 +224,12 @@ class OrmModelExporter {
                     $result[$exportFieldName] = $fields[$exportFieldName];
                 }
             }
+        }
+
+        if (!$result && $includeDefault) {
+            $result = $fields;
+
+            unset($result[ModelTable::PRIMARY_KEY]);
         }
 
         return $result;
