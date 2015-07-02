@@ -37,8 +37,8 @@ class GenericEntryPopulator implements EntryPopulator {
                 continue;
             }
 
-            if (isset($row[$columnName])) {
-                $this->reflectionHelper->setProperty($entry, $columnName, $row[$columnName]);
+            if (isset($data[$columnName])) {
+                $this->reflectionHelper->setProperty($entry, $columnName, $data[$columnName]);
             }
         }
     }
