@@ -144,8 +144,6 @@ class OrmModelExporter {
 
         // map id
         $columnIndex = 1;
-        $destinationProvider->setColumnName($columnIndex++, '#');
-        $mapper->mapColumn(ModelTable::PRIMARY_KEY, '#');
 
         // map fields
         foreach ($fields as $fieldName => $field) {
