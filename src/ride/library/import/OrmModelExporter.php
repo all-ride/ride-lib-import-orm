@@ -152,7 +152,7 @@ class OrmModelExporter {
             $columnName = $this->getColumnName($field);
 
             if ($field instanceof RelationField) {
-                // hasOne or belongsTo
+                // relation field on top level
                 $relationModelName = $field->getRelationModelName();
                 $relationModel = $orm->getModel($relationModelName);
 
@@ -170,14 +170,52 @@ class OrmModelExporter {
                         $relationColumnName .= ' (' . $columnName . ')';
                     }
 
-                    $destinationProvider->setColumnName($columnIndex, $relationColumnName);
+                    if ($relationField instanceof HasManyField) {
+                        // hasMany on relation level
+                        $destinationProvider->setColumnName($columnIndex, $relationColumnName);
+                        $mapper->mapColumn($fieldName, $relationColumnName);
 
-                    $mapper->mapColumn($fieldName, $relationColumnName);
-
-                    if ($relationField instanceof RelationField) {
                         $mapper->addDecorator($relationColumnName, new EntryFormatDecorator($entryFormatter, '{' . $relationFieldName . '}'));
                         $mapper->addDecorator($relationColumnName, new EntryFormatDecorator($entryFormatter, '{' . ModelTable::PRIMARY_KEY . '}'));
+                    } elseif ($relationField instanceof RelationField) {
+                        // belongsTo or hasOne on relation level
+                        $subRelationModelName = $relationField->getRelationModelName();
+                        $subRelationModel = $orm->getModel($subRelationModelName);
+
+                        $exportFields = $relationField->getOption('scaffold.export', true);
+                        $exportFields = $this->getExportFields($exportFields);
+
+                        $subRelationFields = $subRelationModel->getMeta()->getFields();
+                        $subRelationFields = $this->getFields($subRelationFields, $exportFields, false);
+
+                        $relationColumnName = $this->getColumnName($relationField);
+
+                        foreach ($subRelationFields as $subRelationFieldName => $subRelationField) {
+                            if ($subRelationFieldName === ModelTable::PRIMARY_KEY) {
+                                $subRelationColumnName = '#';
+                            } else {
+                                $subRelationColumnName = $this->getColumnName($subRelationField);
+                            }
+                            $subRelationColumnName .= ' (' . $columnName . ' - ' . $relationColumnName . ')';
+
+                            $destinationProvider->setColumnName($columnIndex, $subRelationColumnName);
+
+                            $mapper->mapColumn($fieldName, $subRelationColumnName);
+                            $mapper->addDecorator($subRelationColumnName, new EntryFormatDecorator($entryFormatter, '{' . $relationFieldName . '.' . $subRelationFieldName . '}'));
+
+                            if ($subRelationField instanceof RelationField) {
+                                $mapper->addDecorator($subRelationColumnName, new EntryFormatDecorator($entryFormatter, '{' . ModelTable::PRIMARY_KEY . '}'));
+                            } elseif (isset($decorators[$subRelationField->getType()])) {
+                                $mapper->addDecorator($subRelationColumnName, $decorators[$subRelationField->getType()]);
+                            }
+
+                            $columnIndex++;
+                        }
                     } else {
+                        // regular property on relation level
+                        $destinationProvider->setColumnName($columnIndex, $relationColumnName);
+                        $mapper->mapColumn($fieldName, $relationColumnName);
+
                         $mapper->addDecorator($relationColumnName, new EntryFormatDecorator($entryFormatter, '{' . $relationFieldName . '}'));
                         if (isset($decorators[$relationField->getType()])) {
                             $mapper->addDecorator($relationColumnName, $decorators[$relationField->getType()]);
@@ -187,7 +225,7 @@ class OrmModelExporter {
                     $columnIndex++;
                 }
             } else {
-                // regular property
+                // regular property on top level
                 $destinationProvider->setColumnName($columnIndex, $columnName);
 
                 $mapper->mapColumn($fieldName, $columnName);
