@@ -3,6 +3,7 @@
 namespace ride\library\import\provider\orm;
 
 use ride\library\import\provider\orm\populator\EntryPopulator;
+use ride\library\import\provider\orm\populator\GenericEntryPopulator;
 use ride\library\import\provider\DestinationProvider;
 use ride\library\import\Importer;
 use ride\library\orm\definition\ModelTable;
