@@ -67,6 +67,12 @@ class OrmDestinationProvider extends AbstractOrmProvider implements DestinationP
     protected $isTransactionStarted;
 
     /**
+     * Instance of the entry populator
+     * @var \ride\library\import\provider\orm\populator\EntryPopulator
+     */
+    protected $entryPopulator;
+
+    /**
      * Sets the source column which holds the id in the source provider
      * @param string $sourceId Name of the source column
      * @return null
