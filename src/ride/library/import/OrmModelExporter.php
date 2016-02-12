@@ -148,7 +148,6 @@ class OrmModelExporter {
         // map fields
         foreach ($fields as $fieldName => $field) {
             $columnName = $this->getColumnName($field);
-
             if ($field instanceof RelationField) {
                 // relation field on top level
                 $relationModelName = $field->getRelationModelName();
@@ -278,7 +277,7 @@ class OrmModelExporter {
      * the name of the field as key and value
      */
     protected function getExportFields($exportOption) {
-        if ($exportOption === '1' || strtolower($exportOption) === 'true') {
+        if ($exportOption === true || $exportOption === '1' || strtolower($exportOption) === 'true') {
             return true;
         }
 
