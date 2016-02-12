@@ -149,6 +149,29 @@ class OrmModelExporter {
         foreach ($fields as $fieldName => $field) {
             $columnName = $this->getColumnName($field);
             if ($field instanceof RelationField) {
+                // custom decorators take priority
+                $decorator = $field->getOption('scaffold.export.decorator');
+                if ($decorator) {
+                    if (strpos($decorator, '#')) {
+                        list($interface, $id) = explode('#', $decorator, 2);
+                    } else {
+                        $interface = $decorator;
+                        $id = null;
+                    }
+
+                    $dependencyInjector = $model->getOrmManager()->getDependencyInjector();
+                    $decorator = $dependencyInjector->get($interface, $id);
+
+                    $destinationProvider->setColumnName($columnIndex, $columnName);
+
+                    $mapper->mapColumn($fieldName, $columnName);
+                    $mapper->addDecorator($columnName, $decorator);
+
+                    $columnIndex++;
+
+                    continue;
+                }
+
                 // relation field on top level
                 $relationModelName = $field->getRelationModelName();
                 $relationModel = $orm->getModel($relationModelName);
