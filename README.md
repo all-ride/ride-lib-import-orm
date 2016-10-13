@@ -41,3 +41,22 @@ function importModel(OrmManager $orm, ReflectionHelper $reflectionHelper) {
     $importer->import();
 }
 ```
+
+## Related Modules
+
+- [ride/lib-common](https://github.com/all-ride/ride-lib-common)
+- [ride/lib-i18n](https://github.com/all-ride/ride-lib-i18n)
+- [ride/lib-import](https://github.com/all-ride/ride-lib-import)
+- [ride/lib-import-database](https://github.com/all-ride/ride-lib-import-database)
+- [ride/lib-import-excel](https://github.com/all-ride/ride-lib-import-excel)
+- [ride/lib-orm](https://github.com/all-ride/ride-lib-orm)
+- [ride/lib-reflection](https://github.com/all-ride/ride-lib-reflection)
+- [ride/lib-validation](https://github.com/all-ride/ride-lib-validation)
+
+## Installation
+
+You can use [Composer](http://getcomposer.org) to install this library.
+
+```
+composer require ride/lib-import-orm
+```
