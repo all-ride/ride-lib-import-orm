@@ -58,12 +58,12 @@ class OrmSourceProvider extends AbstractOrmProvider implements SourceProvider {
      * value to import as value. Null is returned when all rows are processed.
      */
     public function getRow() {
-        $row = each($this->result);
+        $row = current($this->result);
         if ($row === false) {
             return null;
         }
-
-        $row = $row['value'];
+        
+        next($this->result);
         $reflectionHelper = $this->model->getReflectionHelper();
 
         $result = array();
