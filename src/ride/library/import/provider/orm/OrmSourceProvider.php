@@ -18,6 +18,8 @@ class OrmSourceProvider extends AbstractOrmProvider implements SourceProvider {
      */
     protected $query;
 
+    protected $includedFields;
+
     /**
      * Sets the query which will be used to fetch the source entries
      * @param \ride\library\orm\query\ModelQuery $query $query
@@ -44,6 +46,14 @@ class OrmSourceProvider extends AbstractOrmProvider implements SourceProvider {
     }
 
     /**
+     * Sets the fields which should not be fetched
+     * @param array Array with the field name as key
+     */
+    public function setIncludedFields(array $includedFields) {
+        $this->includedFields = $includedFields;
+    }
+
+    /**
      * Performs preparation tasks of the import
      * @return null
      */
@@ -58,16 +68,21 @@ class OrmSourceProvider extends AbstractOrmProvider implements SourceProvider {
      * value to import as value. Null is returned when all rows are processed.
      */
     public function getRow() {
-        $row = each($this->result);
+        $row = current($this->result);
         if ($row === false) {
             return null;
         }
 
-        $row = $row['value'];
+        next($this->result);
+
         $reflectionHelper = $this->model->getReflectionHelper();
 
         $result = array();
         foreach ($this->columnNames as $columnName) {
+            if ($this->includedFields && !isset($this->includedFields[$columnName])) {
+                continue;
+            }
+
             $result[$columnName] = $reflectionHelper->getProperty($row, $columnName);
         }
 

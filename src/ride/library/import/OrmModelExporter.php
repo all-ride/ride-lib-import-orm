@@ -142,6 +142,8 @@ class OrmModelExporter {
         $fields = $meta->getFields();
         $fields = $this->getFields($fields, $exportFields, true);
 
+        $sourceProvider->setIncludedFields($fields);
+
         // map id
         $columnIndex = 1;
 

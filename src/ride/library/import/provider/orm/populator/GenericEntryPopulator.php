@@ -14,7 +14,7 @@ class GenericEntryPopulator implements EntryPopulator {
      * Instance of the reflection helper
      * @var \ride\library\reflection\ReflectionHelper
      */
-    private $reflectionHelper;
+    protected $reflectionHelper;
 
     /**
      * Constructs a new entry populator
